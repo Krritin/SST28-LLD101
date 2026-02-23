@@ -7,30 +7,30 @@ public class EligibilityEngine {
 
     public void runAndPrint(StudentProfile s) {
         ReportPrinter p = new ReportPrinter();
-        EligibilityEngineResult r = evaluate(s); // giant conditional inside
+        EligibilityEngineResult r = evaluate(s);
         p.print(s, r);
         store.save(s.rollNo, r.status);
     }
 
     public EligibilityEngineResult evaluate(StudentProfile s) {
-        List<String> reasons = new ArrayList<>();
-        String status = "ELIGIBLE";
+        RuleInput cfg = new RuleInput();
+        List<Rule> rules = List.of(
+                new DisciplinaryRule(),
+                new CgrRule(cfg),
+                new AttendanceRule(cfg),
+                new CreditsRule(cfg)
+        );
 
-        // OCP violation: long chain for each rule
-        if (s.disciplinaryFlag != LegacyFlags.NONE) {
-            status = "NOT_ELIGIBLE";
-            reasons.add("disciplinary flag present");
-        } else if (s.cgr < 8.0) {
-            status = "NOT_ELIGIBLE";
-            reasons.add("CGR below 8.0");
-        } else if (s.attendancePct < 75) {
-            status = "NOT_ELIGIBLE";
-            reasons.add("attendance below 75");
-        } else if (s.earnedCredits < 20) {
-            status = "NOT_ELIGIBLE";
-            reasons.add("credits below 20");
+        List<String> reasons = new ArrayList<>();
+        for (Rule r : rules) {
+            String reason = r.check(s);
+            if (reason != null) {
+                reasons.add(reason);
+                break; // report first failure only to match sample output
+            }
         }
 
+        String status = reasons.isEmpty() ? "ELIGIBLE" : "NOT_ELIGIBLE";
         return new EligibilityEngineResult(status, reasons);
     }
 }
