@@ -1,9 +1,7 @@
+/**
+ * Legacy marker type kept only for compatibility with existing registry list.
+ * No methods here; real capabilities are expressed via smaller interfaces like
+ * PowerDevice, BrightnessDevice, TemperatureDevice, AttendanceDevice, InputSourceDevice.
+ */
 public interface SmartClassroomDevice {
-    // Fat interface (ISP violation)
-    void powerOn();
-    void powerOff();
-    void setBrightness(int pct);
-    void setTemperatureC(int c);
-    int scanAttendance();
-    void connectInput(String port);
 }
